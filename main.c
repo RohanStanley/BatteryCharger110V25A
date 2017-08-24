@@ -110,10 +110,10 @@ uint16_t I_LOAD_VREF_PIN = 14;
 char res0[20]="";
 uint16_t delayCount = 9000, Xcount = 0;
 float FVL_sense, vref_sense, ibatt_sense, Scaling = 1.0;
-float alphaMin = 20.0, alphaMax = 160.0;
+float alphaMin = 20.0, alphaMax = 118.80;
 float SUM = 0.0;
-float potValue, V_BATT, I_BATT, SCALINGx = 29.66, I_BATT_VREF, I_LOAD , I_LOAD_VREF;
-uint16_t delayValue;
+float potValue, V_BATT, I_BATT, SCALINGx = 33.0709, I_BATT_VREF, I_LOAD , I_LOAD_VREF;
+uint16_t delayValue = 6000;
 float alphaValue;
 float FVL_REF, BVL_REF;
 float alphaNew, alphaOld , alphaX = 0.5;
@@ -124,14 +124,14 @@ float BBC_LIMIT_MAX = 20.0;
 float BOOST_VBATT_LIMIT =115.5;
 float BOOST_VCHARGER_LIMIT = 129.25;
 
-unsigned long pulseWidthUsec = 300;
+unsigned long pulseWidthUsec = 500;
 
-uint16_t cycleCount;
+uint16_t cycleCount=0;
 
 //FLAGS
 bool softStart_Flag = 0;
 bool FirstIteration_Flag = 1;
-bool ModeChange_Flag = 0;
+bool ModeChange_Flag = 1;
 bool TEST3_Flag = 0, TEST4_Flag= 0, TEST5_Flag = 0, TEST6_Flag = 0;
 
 uint16_t ADCRead(uint16_t channel);
@@ -155,6 +155,14 @@ int main(void) {
     uart_Init();
     
     while(1){
+            
+//           while(1){
+//               EN=1;
+//           if(H8){
+//            SCR_CON1 = 1;
+//            }
+//            else SCR_CON1 = 0;
+//            }
 //        if(H2){
 //            LED = 1;
 //        }
@@ -330,12 +338,15 @@ int main(void) {
                 __delay_ms(1);
                 Int1Enable = 1;
                 Int0Enable = 1;
+                cycleCount = 0;
             }
-            cycleCount = 0;
-            //potValue = GET_MEAN(FVL_PIN , 4);
+            
+            Int1Enable = 1;
+            Int0Enable = 1;
+            potValue = GET_MEAN(FVL_PIN , 4);
             //float potScaled = potSense * Scaling;
-            //alphaValue = alphaMin + ((potValue/5.0)*(alphaMax - alphaMin));
-            //delayValue = (int)((alphaValue/180.0)*10000.0);
+            alphaValue = alphaMin + ((potValue/5.0)*(alphaMax - alphaMin));
+            delayValue = (int)((alphaValue/180.0)*10000.0);
             
             //V_BATT = GET_MEAN(V_BATT_PIN , 4);
             //V_BATT = (V_BATT * SCALINGx) + 90.0;
@@ -346,14 +357,25 @@ int main(void) {
             //I_BATT = (I_BATT * 5.0);
             
 
-            //while(cycleCount < 1000){
+            if(cycleCount > 25){
                 
                 //if(alphaValue <= 90.0){
                     
-                    potValue = GET_MEAN(FVL_PIN , 4);
-                    //float potScaled = potSense * Scaling;
-                    alphaValue = alphaMin + ((potValue/5.0)*(alphaMax - alphaMin));
-                    delayValue = (int)((alphaValue/180.0)*10000.0);
+//                    potValue = GET_MEAN(FVL_PIN , 4);
+                    
+//                    floatToString_UART_print(potValue, res0, 4);
+//                    UART_print("\n\r");
+//                    __delay_us(5);
+//                    
+                    
+//                    //float potScaled = potSense * Scaling;
+//                    alphaValue = alphaMin + ((potValue/5.0)*(alphaMax - alphaMin));
+//                    delayValue = (int)((alphaValue/180.0)*10000.0);
+                    
+//                    floatToString_UART_print((float)delayValue, res0, 4);
+//                    UART_print("\n\r");
+//                    __delay_us(5);
+//                    
                     V_BATT = GET_MEAN(V_BATT_PIN , 4);
                     V_BATT = (V_BATT * SCALINGx);
             
@@ -368,11 +390,11 @@ int main(void) {
                     UART_print("\n\r");
                     __delay_us(5);
                     
-                    UART_print("IBATT=");
-                    __delay_us(5);
-                    floatToString_UART_print(I_BATT, res0, 4);
-                    UART_print("\n\r");
-                    __delay_us(5);
+//                    UART_print("IBATT=");
+//                    __delay_us(5);
+//                    floatToString_UART_print(I_BATT, res0, 4);
+//                    UART_print("\n\r");
+//                    __delay_us(5);
                     
                     UART_print("D =");
                     __delay_us(5);
@@ -380,9 +402,11 @@ int main(void) {
                     UART_print("\n\r");
                     __delay_us(5);
                     
+                   cycleCount = 0; 
+                    
               //  }
                 
-            //}
+            }
             
             
         }
@@ -419,12 +443,13 @@ int main(void) {
                         __delay_ms(500);
                 }
                 softStart();
+                cycleCount = 0;
             }
-            cycleCount = 0;
+            
             Int1Enable = 1;
             Int0Enable = 1;
             
-            while(cycleCount < 1000){
+            if(cycleCount > 25){
                 
                 //if(alphaValue <= 90.0){
                     
@@ -455,7 +480,7 @@ int main(void) {
 //                    __delay_us(5);
                     
                // }
-                
+                cycleCount = 0;
             }
         }
         ModeChange_Flag = 1;
@@ -826,6 +851,7 @@ void __attribute__((__interrupt__, auto_psv )) _ISR _INT0Interrupt (void){ //ZCD
     //delayCount -= 33;
     Int0Enable = 1;
     return;
+    
 }
 
 float GET_MEAN(uint16_t channel, uint16_t sampleSize){
@@ -833,7 +859,7 @@ float GET_MEAN(uint16_t channel, uint16_t sampleSize){
     
     for(Xcount = 1; Xcount <=sampleSize ;Xcount ++){
         uint16_t xvalue = ADCRead(channel);
-        float xReal = (xvalue/4095.0)*5.0010;
+        float xReal = ((float)xvalue/4095.0)*5.0010;
         SUM = xReal + SUM;
     }
     return (SUM/(float)sampleSize);
