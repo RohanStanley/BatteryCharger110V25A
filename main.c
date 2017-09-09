@@ -158,74 +158,7 @@ int main(void) {
     uart_Init();
     
     while(1){
-            
-//           while(1){
-//               EN=1;
-//           if(H8){
-//            SCR_CON1 = 1;
-//            }
-//            else SCR_CON1 = 0;
-//            }
-//        if(H2){
-//            LED = 1;
-//        }
-//        else LED = 0;
-
-//        I_BATT_VREF = GET_MEAN(I_BATT_VREF_PIN , 4);
-//        I_BATT = GET_MEAN(I_BATT_PIN , 4);
-//        //I_BATT = (I_BATT - I_BATT_VREF)/0.025;
-//        I_LOAD_VREF = GET_MEAN(I_LOAD_VREF_PIN , 4);
-//        I_LOAD = GET_MEAN(I_LOAD_PIN , 4);
-//        
-//        UART_print("I_BATT = ");
-//        __delay_us(5);
-//        floatToString_UART_print(I_BATT, res0, 4);
-//        UART_print("\n\r");
-//        __delay_us(5);
-//        
-//        
-//        UART_print("I_BATT_VREF = ");
-//        __delay_us(5);
-//        floatToString_UART_print(I_BATT_VREF, res0, 4);
-//        UART_print("\n\r");
-//        __delay_us(5);
-//        
-//        
-//        UART_print("I_LOAD = ");
-//        __delay_us(5);
-//        floatToString_UART_print(I_LOAD, res0, 4);
-//        UART_print("\n\r");
-//        __delay_us(5);
-//        
-//        
-//        UART_print("I_LOAD_VREF = ");
-//        __delay_us(5);
-//        floatToString_UART_print(I_LOAD_VREF, res0, 4);
-//        UART_print("\n\r");
-//        __delay_us(5);
-//        
-//        
-//        
-//        __delay_ms(1000);
-//        uint16_t OFFsetx = ADCRead(22);
-//        __delay_us(100);
-//        uint16_t read = ADCRead(I_BATT_PIN);
-//        __delay_us(100);
-//        
-//        UART_print("Offset = ");
-//        __delay_us(5);
-//        floatToString_UART_print((float)OFFsetx, res0, 4);
-//        UART_print("\n\r");
-//        __delay_us(5);
-//        
-//        UART_print("I_BATT_read = ");
-//        __delay_us(5);
-//        floatToString_UART_print((float)read, res0, 4);
-//        UART_print("\n\r");
-//        
-//        __delay_ms(500);
-        
-        
+        //TEST 1
         while(H8 && H4 && H1){   // (OFF-OFF-OFF)
             
             if(ModeChange_Flag){
@@ -258,6 +191,7 @@ int main(void) {
         }
         ModeChange_Flag = 1;
         
+        //TEST 2
         while(H8 && H4 && !H1){     // (OFF-OFF-ON)
             
             if(ModeChange_Flag){
@@ -300,6 +234,7 @@ int main(void) {
         }
         ModeChange_Flag = 1;
         
+        //TEST 3
         while(H8 && !H4 && !H1){     // (OFF-ON-ON)
             if(ModeChange_Flag){
                 Int1Enable = 0;
@@ -324,6 +259,7 @@ int main(void) {
         }
         ModeChange_Flag = 1;
         
+        //TEST 4
         while(H8 && !H4 && H1){     // (OFF-ON-OFF)
          
         LED = 0;
@@ -347,38 +283,10 @@ int main(void) {
             Int1Enable = 1;
             Int0Enable = 1;
             potValue = GET_MEAN(FVL_PIN , 4);
-            //float potScaled = potSense * Scaling;
             alphaValue = alphaMin + ((potValue/5.0)*(alphaMax - alphaMin));
             delayValue = (int)((alphaValue/180.0)*10000.0);
-            
-            //V_BATT = GET_MEAN(V_BATT_PIN , 4);
-            //V_BATT = (V_BATT * SCALINGx) + 90.0;
-            
-            //I_BATT_VREF = GET_MEAN(I_BATT_VREF_PIN , 4);
-            //I_BATT = GET_MEAN(I_BATT_PIN , 4);
-            //I_BATT = (I_BATT - I_BATT_VREF)/0.025;
-            //I_BATT = (I_BATT * 5.0);
-            
 
             if(cycleCount > 25){
-                
-                //if(alphaValue <= 90.0){
-                    
-//                    potValue = GET_MEAN(FVL_PIN , 4);
-                    
-//                    floatToString_UART_print(potValue, res0, 4);
-//                    UART_print("\n\r");
-//                    __delay_us(5);
-//                    
-                    
-//                    //float potScaled = potSense * Scaling;
-//                    alphaValue = alphaMin + ((potValue/5.0)*(alphaMax - alphaMin));
-//                    delayValue = (int)((alphaValue/180.0)*10000.0);
-                    
-//                    floatToString_UART_print((float)delayValue, res0, 4);
-//                    UART_print("\n\r");
-//                    __delay_us(5);
-//                    
                     V_BATT = GET_MEAN(V_BATT_PIN , 4);
                     V_BATT = (V_BATT * SCALINGx);
             
@@ -404,17 +312,13 @@ int main(void) {
                     floatToString_UART_print(alphaValue, res0, 4);
                     UART_print("\n\r");
                     __delay_us(5);
-                    
-                   cycleCount = 0; 
-                    
-              //  }
-                
+                    cycleCount = 0; 
             }
-            
             
         }
         ModeChange_Flag = 1;
         
+        //TEST 5
         while(!H8 && !H4 && H1){     // (ON-ON-OFF)
             
             if(ModeChange_Flag){
@@ -453,111 +357,90 @@ int main(void) {
             Int0Enable = 1;
             
             if(cycleCount > 25){
-                
-                //if(alphaValue <= 90.0){
-                    
                     V_BATT = GET_MEAN(V_BATT_PIN , 4);
                     V_BATT = (V_BATT * SCALINGx);
-            
-//                    //I_BATT_VREF = GET_MEAN(I_BATT_VREF_PIN , 4);
-//                    I_BATT = GET_MEAN(I_BATT_PIN , 4);
-//                    //I_BATT = (I_BATT - I_BATT_VREF)/0.025;
-//                    I_BATT = (I_BATT * 5.0);
-                    
                     UART_print("V_BATT=");
                     __delay_us(5);
                     floatToString_UART_print(V_BATT, res0, 4);
                     UART_print("\n\r");
                     __delay_us(5);
-                    
-//                    UART_print("IBATT=");
-//                    __delay_us(5);
-//                    floatToString_UART_print(I_BATT, res0, 4);
-//                    UART_print("\n\r");
-//                    __delay_us(5);
-                    
-//                    UART_print("D =");
-//                    __delay_us(5);
-//                    floatToString_UART_print(alphaValue, res0, 4);
-//                    UART_print("\n\r");
-//                    __delay_us(5);
-                    
-               // }
-                cycleCount = 0;
+                    cycleCount = 0;
             }
         }
         ModeChange_Flag = 1;
-//        while(!H8 && H4 && H1){     // (ON-OFF-OFF)
-//                
-//                if(ModeChange_Flag){
-//                Int1Enable = 0;
-//                Int0Enable = 0;
-//                TEST3_Flag = 0;
-//                ModeChange_Flag = 0;
-//                TEST4_Flag = 0;
-//                TEST5_Flag = 0;
-//                TEST6_Flag = 1;
-//                
-//                
-//                UART_print("TEST6 : VMC\n\r");
-//                for(Xcount = 0; Xcount<10; Xcount++){
-//                        ManAutoMode = 0;
-//                        BoostFloatMode = 0;
-//                        UVLED = 0;
-//                        OVLED = 0;
-//                        OCLED = 0;
-//                        LED = 0;
-//                        __delay_ms(500);
-//                        ManAutoMode = 1;
-//                        BoostFloatMode = 1;
-//                        UVLED = 1;
-//                        OVLED = 1;
-//                        OCLED = 1;
-//                        LED = 1;
-//                        __delay_ms(500);
-//                }
-//                softStart();
-//            }
-//            cycleCount = 0;
-//            Int1Enable = 1;
-//            Int0Enable = 1;
-//            FVL_REF = GET_MEAN(FVL_PIN , 4);
-//            FVL_REF = FVL_REF_CENTER + SCALING(FVL_REF , FVL_REF_CENTER);
-//
-//            BVL_REF = GET_MEAN(BVL_PIN , 4);
-//            BVL_REF = BOOST_VBATT_LIMIT + SCALING(BVL_REF , BOOST_VBATT_LIMIT);
-//            
-//            V_BATT = GET_MEAN(V_BATT_PIN , 4);
-//            V_BATT = (V_BATT * SCALINGx);
-//
-//            I_BATT_VREF = GET_MEAN(I_BATT_VREF_PIN , 4);
-//            I_BATT = GET_MEAN(I_BATT_PIN , 4);
-//            I_BATT = (I_BATT - I_BATT_VREF)/0.02500;
-//            
-//            if(V_BATT < FVL_REF*0.98){
-//                alphaNew = alphaOld - alphaX;
-//            }
-//        
-//            else if((V_BATT > FVL_REF*0.98) && (V_BATT < FVL_REF*1.02) ){
-//                alphaNew = alphaOld;
-//            }
-//        
-//            else if(V_BATT > FVL_REF*1.02){
-//                alphaNew = alphaOld + alphaX;
-//            }   
-//        
-//            if(alphaNew < 20.0){
-//                alphaNew = 20.0;
-//            }
-//        
-//            alphaOld = alphaNew;
-//            updateDelay(alphaNew);
-//            
-//                
-//        }
-//        
-//        ModeChange_Flag = 1;
+        
+/*      //TEST 6  
+        while(!H8 && H4 && H1){     // (ON-OFF-OFF)
+                
+                if(ModeChange_Flag){
+                Int1Enable = 0;
+                Int0Enable = 0;
+                TEST3_Flag = 0;
+                ModeChange_Flag = 0;
+                TEST4_Flag = 0;
+                TEST5_Flag = 0;
+                TEST6_Flag = 1;
+                
+                
+                UART_print("TEST6 : VMC\n\r");
+                for(Xcount = 0; Xcount<10; Xcount++){
+                        ManAutoMode = 0;
+                        BoostFloatMode = 0;
+                        UVLED = 0;
+                        OVLED = 0;
+                        OCLED = 0;
+                        LED = 0;
+                        __delay_ms(500);
+                        ManAutoMode = 1;
+                        BoostFloatMode = 1;
+                        UVLED = 1;
+                        OVLED = 1;
+                        OCLED = 1;
+                        LED = 1;
+                        __delay_ms(500);
+                }
+                softStart();
+            }
+            cycleCount = 0;
+            Int1Enable = 1;
+            Int0Enable = 1;
+            FVL_REF = GET_MEAN(FVL_PIN , 4);
+            FVL_REF = FVL_REF_CENTER + SCALING(FVL_REF , FVL_REF_CENTER);
 
+            BVL_REF = GET_MEAN(BVL_PIN , 4);
+            BVL_REF = BOOST_VBATT_LIMIT + SCALING(BVL_REF , BOOST_VBATT_LIMIT);
+            
+            V_BATT = GET_MEAN(V_BATT_PIN , 4);
+            V_BATT = (V_BATT * SCALINGx);
+
+            I_BATT_VREF = GET_MEAN(I_BATT_VREF_PIN , 4);
+            I_BATT = GET_MEAN(I_BATT_PIN , 4);
+            I_BATT = (I_BATT - I_BATT_VREF)/0.02500;
+            
+            if(V_BATT < FVL_REF*0.98){
+                alphaNew = alphaOld - alphaX;
+            }
+        
+            else if((V_BATT > FVL_REF*0.98) && (V_BATT < FVL_REF*1.02) ){
+                alphaNew = alphaOld;
+            }
+        
+            else if(V_BATT > FVL_REF*1.02){
+                alphaNew = alphaOld + alphaX;
+            }   
+        
+            if(alphaNew < 20.0){
+                alphaNew = 20.0;
+            }
+        
+            alphaOld = alphaNew;
+            updateDelay(alphaNew);
+            
+                
+        }
+        
+        ModeChange_Flag = 1;
+*/
         
         
         
