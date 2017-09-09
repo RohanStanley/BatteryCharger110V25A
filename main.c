@@ -125,9 +125,9 @@ float BOOST_VBATT_LIMIT =115.5;
 float BOOST_VCHARGER_LIMIT = 129.25;
 
 unsigned long pulseWidthUsec = 500;
-unsigned long pwmUsec = 90;
+unsigned long pwmUsec = 20;
 unsigned long delayValueFor110 = 6111;
-unsigned long PwmSum = 0;
+uint16_t PwmSum = 0;
 
 uint16_t cycleCount=0;
 
@@ -788,7 +788,7 @@ void __attribute__((__interrupt__, auto_psv )) _ISR _INT1Interrupt (void){ //ZCD
     if(TEST4_Flag){
         __delay_us(delayValue);
         if(delayValue < delayValueFor110){
-            for(PwmSum = 0;PwmSum < (delayValueFor110-delayValue);PwmSum += pwmUsec){
+            for(PwmSum = 0;PwmSum < ((int)delayValueFor110-delayValue);PwmSum += (int)pwmUsec){
                 EN = 1;
                 SCR_CON1 = 1;
                 __delay_us(pwmUsec);
@@ -850,15 +850,15 @@ void __attribute__((__interrupt__, auto_psv )) _ISR _INT0Interrupt (void){ //ZCD
     if(TEST4_Flag){
         __delay_us(delayValue); 
         if(delayValue < delayValueFor110){
-            for(PwmSum = 0;PwmSum < (delayValueFor110-delayValue);PwmSum += pwmUsec){
+            for(PwmSum = 0;PwmSum < ((int)delayValueFor110-delayValue);PwmSum += (int)pwmUsec){
                 EN = 1;
-                SCR_CON1 = 1;
+                SCR_CON2 = 1;
                 __delay_us(pwmUsec);
-                SCR_CON1 = 0;
+                SCR_CON2 = 0;
                 EN = 0;
                 __delay_us(pwmUsec);
             }
-            Int1Enable = 1;
+            Int0Enable = 1;
             return;
         }
         EN = 1;
