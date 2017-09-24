@@ -137,6 +137,7 @@ bool FirstIteration_Flag = 1;
 bool ModeChange_Flag = 1;
 bool TEST3_Flag = 0, TEST4_Flag= 0, TEST5_Flag = 0, TEST6_Flag = 0;
 
+//Function Prototypes
 uint16_t ADCRead(uint16_t channel);
 float GET_MEAN(uint16_t channel, uint16_t sampleSize);
 void sysClock(void);
@@ -262,6 +263,34 @@ int main(void) {
         //TEST 4
         while(H8 && !H4 && H1){     // (OFF-ON-OFF)
          
+/*            cycleCount = 0;
+            float change = 2.5;
+            alphaValue = 70.0;
+            Int1Enable = 1;
+            Int0Enable = 1;
+            TEST3_Flag = 0;
+            ModeChange_Flag = 0;
+            softStart_Flag = 0;
+            TEST4_Flag = 1;
+            TEST5_Flag = 0;
+            TEST6_Flag = 0;
+            delayValue = (int)((alphaValue/180.0)*10000.0);
+            while(1){
+                if(cycleCount>150){
+                    cycleCount = 0;
+                    delayValue = (int)((alphaValue/180.0)*10000.0);
+                    alphaValue += change;
+                    if(alphaValue > 110.0){
+                        alphaValue = 110.0;
+                        change = -2.5;
+                    }
+                    if(alphaValue < 70.0){
+                        alphaValue = 70.0;
+                        change = 2.5;
+                    }
+                }
+            }
+ */
         LED = 0;
             if(ModeChange_Flag){
                 Int1Enable = 0;
@@ -287,32 +316,32 @@ int main(void) {
             delayValue = (int)((alphaValue/180.0)*10000.0);
 
             if(cycleCount > 25){
-                    V_BATT = GET_MEAN(V_BATT_PIN , 4);
-                    V_BATT = (V_BATT * SCALINGx);
-            
-                    I_BATT_VREF = GET_MEAN(I_BATT_VREF_PIN , 4);
-                    I_BATT = GET_MEAN(I_BATT_PIN , 4);
-                    I_BATT = (I_BATT - I_BATT_VREF)/0.02500;
-                    //I_BATT = (I_BATT * 5.0);
-                    
-                    UART_print("V_BATT=");
-                    __delay_us(5);
-                    floatToString_UART_print(V_BATT, res0, 4);
-                    UART_print("\n\r");
-                    __delay_us(5);
-                    
+                V_BATT = GET_MEAN(V_BATT_PIN , 4);
+                V_BATT = (V_BATT * SCALINGx);
+
+                I_BATT_VREF = GET_MEAN(I_BATT_VREF_PIN , 4);
+                I_BATT = GET_MEAN(I_BATT_PIN , 4);
+                I_BATT = (I_BATT - I_BATT_VREF)/0.02500;
+                //I_BATT = (I_BATT * 5.0);
+
+                UART_print("V_BATT=");
+                __delay_us(5);
+                floatToString_UART_print(V_BATT, res0, 4);
+                UART_print("\n\r");
+                __delay_us(5);
+
 //                    UART_print("IBATT=");
 //                    __delay_us(5);
 //                    floatToString_UART_print(I_BATT, res0, 4);
 //                    UART_print("\n\r");
 //                    __delay_us(5);
-                    
-                    UART_print("D =");
-                    __delay_us(5);
-                    floatToString_UART_print(alphaValue, res0, 4);
-                    UART_print("\n\r");
-                    __delay_us(5);
-                    cycleCount = 0; 
+
+                UART_print("D =");
+                __delay_us(5);
+                floatToString_UART_print(alphaValue, res0, 4);
+                UART_print("\n\r");
+                __delay_us(5);
+                cycleCount = 0; 
             }
             
         }
@@ -357,14 +386,14 @@ int main(void) {
             Int0Enable = 1;
             
             if(cycleCount > 25){
-                    V_BATT = GET_MEAN(V_BATT_PIN , 4);
-                    V_BATT = (V_BATT * SCALINGx);
-                    UART_print("V_BATT=");
-                    __delay_us(5);
-                    floatToString_UART_print(V_BATT, res0, 4);
-                    UART_print("\n\r");
-                    __delay_us(5);
-                    cycleCount = 0;
+                V_BATT = GET_MEAN(V_BATT_PIN , 4);
+                V_BATT = (V_BATT * SCALINGx);
+                UART_print("V_BATT=");
+                __delay_us(5);
+                floatToString_UART_print(V_BATT, res0, 4);
+                UART_print("\n\r");
+                __delay_us(5);
+                cycleCount = 0;
             }
         }
         ModeChange_Flag = 1;
@@ -643,8 +672,8 @@ void Interrupt_Init(void){
 void __attribute__((__interrupt__, auto_psv )) _ISR _INT1Interrupt (void){ //ZCD+
     Int1Enable = 0;
     Int1Flag = 0;
-    
-    
+    SCR_CON2 = 0;
+    EN =1;
     if(softStart_Flag){
         __delay_us(delayCount);
         EN = 1;
@@ -670,23 +699,9 @@ void __attribute__((__interrupt__, auto_psv )) _ISR _INT1Interrupt (void){ //ZCD
     
     if(TEST4_Flag){
         __delay_us(delayValue);
-        if(delayValue < delayValueFor110){
-            for(PwmSum = 0;PwmSum < ((int)delayValueFor110-delayValue);PwmSum += (int)pwmUsec){
-                EN = 1;
-                SCR_CON1 = 1;
-                __delay_us(pwmUsec);
-                SCR_CON1 = 0;
-                EN = 0;
-                __delay_us(pwmUsec);
-            }
-            Int1Enable = 1;
-            return;
-        }
-        EN = 1;
         SCR_CON1 = 1;
         __delay_us(pulseWidthUsec);
         SCR_CON1 = 0;
-        EN = 0;
         Int1Enable = 1;
         return;
     }
@@ -706,8 +721,9 @@ void __attribute__((__interrupt__, auto_psv )) _ISR _INT1Interrupt (void){ //ZCD
 void __attribute__((__interrupt__, auto_psv )) _ISR _INT0Interrupt (void){ //ZCD-
     Int0Enable = 0;
     Int0Flag = 0;
-    
-        if(softStart_Flag){
+    SCR_CON1 = 0;
+    EN =1;
+    if(softStart_Flag){
         __delay_us(delayCount);
         EN = 1;
         SCR_CON2 = 1;
@@ -717,7 +733,7 @@ void __attribute__((__interrupt__, auto_psv )) _ISR _INT0Interrupt (void){ //ZCD
         delayCount -= 28;
         Int0Enable = 1;
         return;
-        }
+    }
     cycleCount += 1;
     if(TEST3_Flag){
         __delay_us(8333);   // 8333uSec = 150degree angle delay
@@ -732,23 +748,9 @@ void __attribute__((__interrupt__, auto_psv )) _ISR _INT0Interrupt (void){ //ZCD
     
     if(TEST4_Flag){
         __delay_us(delayValue); 
-        if(delayValue < delayValueFor110){
-            for(PwmSum = 0;PwmSum < ((int)delayValueFor110-delayValue);PwmSum += (int)pwmUsec){
-                EN = 1;
-                SCR_CON2 = 1;
-                __delay_us(pwmUsec);
-                SCR_CON2 = 0;
-                EN = 0;
-                __delay_us(pwmUsec);
-            }
-            Int0Enable = 1;
-            return;
-        }
-        EN = 1;
         SCR_CON2 = 1;
         __delay_us(pulseWidthUsec);
         SCR_CON2 = 0;
-        EN = 0;
         Int0Enable = 1;
         return;
     }
