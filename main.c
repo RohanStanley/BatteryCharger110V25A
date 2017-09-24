@@ -114,6 +114,7 @@ float alphaMin = 20.0, alphaMax = 118.80;
 float SUM = 0.0;
 float potValue, V_BATT, I_BATT, SCALINGx = 33.0709, I_BATT_VREF, I_LOAD , I_LOAD_VREF;
 uint16_t delayValue = 6000;
+uint16_t sub_value;
 float alphaValue;
 float FVL_REF, BVL_REF;
 float alphaNew, alphaOld , alphaX = 0.5;
@@ -316,7 +317,7 @@ int main(void) {
             delayValue = (int)((alphaValue/180.0)*10000.0);
 
             if(cycleCount > 25){
-                V_BATT = GET_MEAN(V_BATT_PIN , 4);
+                V_BATT = GET_MEAN(V_BATT_PIN , 10);
                 V_BATT = (V_BATT * SCALINGx);
 
                 I_BATT_VREF = GET_MEAN(I_BATT_VREF_PIN , 4);
@@ -398,10 +399,10 @@ int main(void) {
         }
         ModeChange_Flag = 1;
         
-/*      //TEST 6  
+        //TEST 6  
         while(!H8 && H4 && H1){     // (ON-OFF-OFF)
                 
-                if(ModeChange_Flag){
+            if(ModeChange_Flag){
                 Int1Enable = 0;
                 Int0Enable = 0;
                 TEST3_Flag = 0;
@@ -409,8 +410,8 @@ int main(void) {
                 TEST4_Flag = 0;
                 TEST5_Flag = 0;
                 TEST6_Flag = 1;
-                
-                
+
+
                 UART_print("TEST6 : VMC\n\r");
                 for(Xcount = 0; Xcount<10; Xcount++){
                         ManAutoMode = 0;
@@ -429,22 +430,23 @@ int main(void) {
                         __delay_ms(500);
                 }
                 softStart();
+                cycleCount = 0;
             }
-            cycleCount = 0;
             Int1Enable = 1;
             Int0Enable = 1;
-            FVL_REF = GET_MEAN(FVL_PIN , 4);
-            FVL_REF = FVL_REF_CENTER + SCALING(FVL_REF , FVL_REF_CENTER);
+            FVL_REF = GET_MEAN(FVL_PIN , 10);
+            FVL_REF = 65.0 + FVL_REF/5.0 * 70.0;
+//            FVL_REF = FVL_REF_CENTER + SCALING(FVL_REF , FVL_REF_CENTER);
 
-            BVL_REF = GET_MEAN(BVL_PIN , 4);
-            BVL_REF = BOOST_VBATT_LIMIT + SCALING(BVL_REF , BOOST_VBATT_LIMIT);
+//            BVL_REF = GET_MEAN(BVL_PIN , 4);
+//            BVL_REF = BOOST_VBATT_LIMIT + SCALING(BVL_REF , BOOST_VBATT_LIMIT);
             
-            V_BATT = GET_MEAN(V_BATT_PIN , 4);
+            V_BATT = GET_MEAN(V_BATT_PIN , 10);
             V_BATT = (V_BATT * SCALINGx);
 
-            I_BATT_VREF = GET_MEAN(I_BATT_VREF_PIN , 4);
-            I_BATT = GET_MEAN(I_BATT_PIN , 4);
-            I_BATT = (I_BATT - I_BATT_VREF)/0.02500;
+//            I_BATT_VREF = GET_MEAN(I_BATT_VREF_PIN , 4);
+//            I_BATT = GET_MEAN(I_BATT_PIN , 4);
+//            I_BATT = (I_BATT - I_BATT_VREF)/0.02500;
             
             if(V_BATT < FVL_REF*0.98){
                 alphaNew = alphaOld - alphaX;
@@ -465,11 +467,30 @@ int main(void) {
             alphaOld = alphaNew;
             updateDelay(alphaNew);
             
+            //Printing Values in 250msec
+            if(cycleCount > 25){
+                UART_print("FVL =");
+                __delay_us(5);
+                floatToString_UART_print(FVL_REF, res0, 4);
+                UART_print("\n\r");
+                __delay_us(5);
+                UART_print("V_BATT=");
+                __delay_us(5);
+                floatToString_UART_print(V_BATT, res0, 4);
+                UART_print("\n\r");
+                __delay_us(5);
+                UART_print("D =");
+                __delay_us(5);
+                floatToString_UART_print(alphaNew, res0, 4);
+                UART_print("\n\r");
+                __delay_us(5);
+                cycleCount = 0;
+            }
                 
         }
         
         ModeChange_Flag = 1;
-*/
+
         
         
         
@@ -607,12 +628,25 @@ void softStart(void){
     delayCount = 9000;        // starts from 162degrees firing angle
     Int1Enable = 1;
     Int0Enable = 1;
-    while(delayCount > 3428); // will end at 60 degree firing angle
+    while(delayCount > 5000); // will end at 60 degree firing angle
     softStart_Flag = 0;
     alphaNew = ((float)delayCount/10000.0)*180.0;
     alphaOld = alphaNew;
 }
 
+void softStartX(float alphaValue){
+    UART_print("softStart Enabled \n\r");
+    softStart_Flag = 1;
+    delayCount = 9000;
+    uint16_t delayCountFinal = (int)((alphaValue/180.0)*10000.0);
+    sub_value = (int)(45.0 - ((alphaValue*100.0)/360.0));
+    Int1Enable = 1;
+    Int0Enable = 1;
+    while(delayCount > delayCountFinal);
+    softStart_Flag = 0;
+    alphaNew = ((float)delayCount/10000.0)*180.0;
+    alphaOld = alphaNew;
+}
 
 
 void ADCInit() {
@@ -681,7 +715,7 @@ void __attribute__((__interrupt__, auto_psv )) _ISR _INT1Interrupt (void){ //ZCD
         __delay_us(pulseWidthUsec);
         SCR_CON1 = 0;
         EN = 0;
-        delayCount -= 28;
+        delayCount -= 20; // For 90 degree end value
         Int1Enable = 1;
         return;
     }
@@ -730,7 +764,7 @@ void __attribute__((__interrupt__, auto_psv )) _ISR _INT0Interrupt (void){ //ZCD
         __delay_us(pulseWidthUsec);
         SCR_CON2 = 0;
         EN = 0;
-        delayCount -= 28;
+        delayCount -= 20; // For 90 degree end Value
         Int0Enable = 1;
         return;
     }
